@@ -63,7 +63,7 @@ class commercial_reps {
                     </td>
                 </tr>
                 <tr>
-                    <td>Formstack Form Url:</td>
+                    <td>Formstack Url:</td>
                     <td>
                         <label class="screen-reader-text" for="representative-form">Formstack Form Url</label>
                         <input class="code" type="text" name="representative-form" aria-required="true" size="30" value="<?php echo $custom['representative-form'][0] ?>"/>
