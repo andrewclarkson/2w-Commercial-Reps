@@ -15,10 +15,29 @@ Author URI: andrew.clarkson.mn
 
 
 class commercial_reps {
-    
-    public static function register_meta_boxes($post) {
 
+    public static function display_info_meta_box($post) {
+        $custom = get_post_custom($post->ID);
+        ?>
+        <label for="representative-name">Name:</label>
+        <input type="text" name="representative-name" value="<?php echo $custom['representative-name'][0] ?>"/>
+        <?php
     }
+
+    /**
+     * Registers the meta boxes (custom fields) for the Commercial Representative post type
+     */ 
+    public static function register_meta_boxes($post) {
+        // Add the Commercial Representative Info meta box
+        add_meta_box( 
+            'representative-info', // The form field's id
+            __( 'Representative Info', 'commercial_reps' ), // The form field's label
+            array('commercial_reps', 'display_info_meta_box'), // the callback to generate html
+            'commercial_reps' // The post type
+        );
+    }
+
+
 
     /**
      * Registers the Commercial Representative Post Type
