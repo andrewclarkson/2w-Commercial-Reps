@@ -72,6 +72,8 @@ class commercial_reps {
                         <p class="howto">Each representative should have a Formstack form with a unique url.</p>
                     </td>
                 </tr>
+                               
+ 
             </tbody>
         </table>
         <?php
@@ -143,7 +145,38 @@ class commercial_reps {
             'capability_type'     => 'post',
         );
         register_post_type( 'commercial_reps', $args );
-    
+    }
+
+    public static function register_commercial_verticals() {
+
+        $labels = array(
+            'name'                       => _x( 'Verticals', 'Taxonomy General Name', 'commercial_reps' ),
+            'singular_name'              => _x( 'Vertical', 'Taxonomy Singular Name', 'commercial_reps' ),
+            'menu_name'                  => __( 'Verticals', 'commercial_reps' ),
+            'all_items'                  => __( 'All Verticals', 'commercial_reps' ),
+            'parent_item'                => __( 'Parent Vertical', 'commercial_reps' ),
+            'parent_item_colon'          => __( 'Parent Vertical:', 'commercial_reps' ),
+            'new_item_name'              => __( 'New Vertical', 'commercial_reps' ),
+            'add_new_item'               => __( 'Add New Vertical', 'commercial_reps' ),
+            'edit_item'                  => __( 'Edit Vertical', 'commercial_reps' ),
+            'update_item'                => __( 'Update Vertical', 'commercial_reps' ),
+            'separate_items_with_commas' => __( 'Separate verticals with commas', 'commercial_reps' ),
+            'search_items'               => __( 'Search Verticals', 'commercial_reps' ),
+            'add_or_remove_items'        => __( 'Add or remove verticals', 'commercial_reps' ),
+            'choose_from_most_used'      => __( 'Choose from the most used verticals', 'commercial_reps' ),
+            'not_found'                  => __( 'Not Found', 'commercial_reps' ),
+        );
+        $args = array(
+            'labels'                     => $labels,
+            'hierarchical'               => false,
+            'public'                     => true,
+            'show_ui'                    => true,
+            'show_admin_column'          => true,
+            'show_in_nav_menus'          => true,
+            'show_tagcloud'              => true,
+        );
+        register_taxonomy( 'commercial_verticals', array( 'commercial_reps' ), $args );
+
     }
 
 
@@ -151,4 +184,5 @@ class commercial_reps {
 
 // Hook into the 'init' action
 add_action( 'init', array('commercial_reps', 'register_commercial_reps') );
+add_action( 'init', array('commercial_reps', 'register_commercial_verticals') );
 
