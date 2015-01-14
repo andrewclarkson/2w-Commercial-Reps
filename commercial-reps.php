@@ -18,9 +18,62 @@ class commercial_reps {
 
     public static function display_info_meta_box($post) {
         $custom = get_post_custom($post->ID);
+        $photo = $customer['representative-photo'][0];
         ?>
-        <label for="representative-name">Name:</label>
-        <input type="text" name="representative-name" value="<?php echo $custom['representative-name'][0] ?>"/>
+        <table class="form-table">
+            <tbody>
+                <tr>
+                    <td>
+                        <img src="<?php echo $photo ? $photo : 'http://1.gravatar.com/avatar/ad516503a11cd5ca435acc9bb6523536?s=128' ?>">
+                    </td>
+                    <td>
+                        <input type="hidden" name="representative-photo" aria-required="true" size="30" value="<?php echo $custom['representative-photo'][0] ?>"/>
+                        <?php if ($photo) { ?>
+                            <p>
+                                <a href="<?php echo $photo ?>"><?php echo substr($photo, 0, 32); ?>...</a>
+                            </p>
+                        <?php } else { ?>
+                            <p>None</p>
+                        <?php } ?>
+                        <a class="button" id="upload-representative-photo" href="http://localhost/wordpress/wp-admin/media-upload.php?post_id=1&amp;type=image&amp;TB_iframe=1&amp;width=717&amp;height=575">Set Image</a>
+                    </td>
+                    <td>
+                        <p class="howto"></p>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td>Name:</td>
+                    <td>
+                        <label class="screen-reader-text" for="representative-name">Name</label>
+                        <input type="text" name="representative-name" aria-required="true" size="30" value="<?php echo $custom['representative-name'][0] ?>"/>
+                    </td>
+                    <td>
+                        <p class="howto">The representative's full name (first and last).</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Phone Number:</td>
+                    <td>
+                        <label class="screen-reader-text" for="representative-phone">Phone Number</label>
+                        <input type="text" name="representative-phone" aria-required="true" size="30" value="<?php echo $custom['representative-phone'][0] ?>"/>
+                    </td>
+                    <td>
+                        <p class="howto">The representative's phone number.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Formstack Form Url:</td>
+                    <td>
+                        <label class="screen-reader-text" for="representative-form">Formstack Form Url</label>
+                        <input class="code" type="text" name="representative-form" aria-required="true" size="30" value="<?php echo $custom['representative-form'][0] ?>"/>
+                    </td>
+                    <td>
+                        <p class="howto">Each representative should have a Formstack form with a unique url.</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
         <?php
     }
 
@@ -33,7 +86,9 @@ class commercial_reps {
             'representative-info', // The form field's id
             __( 'Representative Info', 'commercial_reps' ), // The form field's label
             array('commercial_reps', 'display_info_meta_box'), // the callback to generate html
-            'commercial_reps' // The post type
+            'commercial_reps', // The post type
+            'normal',
+            'high'
         );
     }
 
@@ -70,7 +125,7 @@ class commercial_reps {
             'label'               => __( 'commercial_reps', 'commercial_reps' ),
             'description'         => __( 'A Commercial Sales Representative', 'commercial_reps' ),
             'labels'              => $labels,
-            'supports'            => array( 'thumbnail', ),
+            'supports'            => false,
             'hierarchical'        => false,
             'register_meta_box_cb'=> array( 'commercial_reps', 'register_meta_boxes' ),
             'public'              => true,
