@@ -41,17 +41,6 @@ class commercial_reps {
                         <p class="howto"></p>
                     </td>
                 </tr>
-                
-                <tr>
-                    <td>Name:</td>
-                    <td>
-                        <label class="screen-reader-text" for="representative-name">Name</label>
-                        <input type="text" name="representative-name" aria-required="true" size="30" value="<?php echo $custom['representative-name'][0] ?>"/>
-                    </td>
-                    <td>
-                        <p class="howto">The representative's full name (first and last).</p>
-                    </td>
-                </tr>
                 <tr>
                     <td>Phone Number:</td>
                     <td>
@@ -127,7 +116,7 @@ class commercial_reps {
             'label'               => __( 'commercial_reps', 'commercial_reps' ),
             'description'         => __( 'A Commercial Sales Representative', 'commercial_reps' ),
             'labels'              => $labels,
-            'supports'            => array( 'title' ),
+            'supports'            => false,
             'hierarchical'        => false,
             'taxonomies'          => array( 'commercial_verticals', 'commercial_territories' ),
             'register_meta_box_cb'=> array( 'commercial_reps', 'register_meta_boxes' ),
@@ -181,49 +170,48 @@ class commercial_reps {
 
     }
 
-    function register_commercial_territories() {
-
-        $labels = array(
-            'name'                       => _x( 'Territories', 'Taxonomy General Name', 'commercial_reps' ),
-            'singular_name'              => _x( 'Territory', 'Taxonomy Singular Name', 'commercial_reps' ),
-            'menu_name'                  => __( 'Territories', 'commercial_reps' ),
-            'all_items'                  => __( 'All Territories', 'commercial_reps' ),
-            'parent_item'                => __( 'Parent Territory', 'commercial_reps' ),
-            'parent_item_colon'          => __( 'Parent Territory:', 'commercial_reps' ),
-            'new_item_name'              => __( 'New Territory', 'commercial_reps' ),
-            'add_new_item'               => __( 'Add New Territory', 'commercial_reps' ),
-            'edit_item'                  => __( 'Edit Territory', 'commercial_reps' ),
-            'update_item'                => __( 'Update Territory', 'commercial_reps' ),
-            'separate_items_with_commas' => __( 'Separate territories with commas', 'commercial_reps' ),
-            'search_items'               => __( 'Search Territory', 'commercial_reps' ),
-            'add_or_remove_items'        => __( 'Add or remove territories', 'commercial_reps' ),
-            'choose_from_most_used'      => __( 'Choose from the most used territories', 'commercial_reps' ),
-            'not_found'                  => __( 'Not Found', 'commercial_reps' ),
+    public static function display_map( $atts ) {
+        $defaults = array( 'verticals' => 'all' );
+        $attributes = shortcode_atts($defaults, $atts);
+        $query = array( 'post_type' => 'commercial_reps' );
+        
+        if($attributes['verticals'] != 'all') {
+            $query['tax_query'] = array(
+                array(
+                    'taxonomy'  => 'commercial_verticals',
+                    'name'     => 'slug',
+                    'terms'     => $attributes['verticals'],
+                ),
+            );
+        }
+        $query['tax_query'] = array(
+            array(
+                'taxonomy'  => 'commercial_verticals',
+                'field'     => 'slug',
+                'terms'     => 'multi-housing',
+            ),
         );
-        $rewrite = array(
-            'slug'                       => 'territories',
-            'with_front'                 => true,
-            'hierarchical'               => true,
-        ); 
-        $args = array(
-            'labels'                     => $labels,
-            'hierarchical'               => true,
-            'public'                     => true,
-            'show_ui'                    => true,
-            'show_admin_column'          => true,
-            'show_in_nav_menus'          => true,
-            'show_tagcloud'              => true,
-            'rewrite'                    => $rewrite,
-        );
-        register_taxonomy( 'commercial_territories', array( 'commercial_reps' ), $args );
 
-    } 
+        $posts = get_posts( $query );
 
+        foreach ( $posts as $post ) {
+            print_r( wp_get_post_terms( $post->ID, 'commercial_territories' ) );
+        }
+    }
+
+    public static function manage_columns( $columns ) {
+        unset($columns['title']);
+        return $columns;
+    }
 
 }
 
 // Hook into the 'init' action
-add_action( 'init', array('commercial_reps', 'register_commercial_territories') );
 add_action( 'init', array('commercial_reps', 'register_commercial_verticals') );
 add_action( 'init', array('commercial_reps', 'register_commercial_reps') );
 
+add_filter( 'manage_commercial_reps_posts_columns', array( 'commercial_reps', 'manage_columns' ) );
+
+
+// Add a shortcode for displaying the map
+add_shortcode( 'commercial_map', array( 'commercial_reps', 'display_map' ) );
