@@ -121,14 +121,15 @@ class commercial_reps {
             'slug'                => 'representatives',
             'with_front'          => true,
             'pages'               => true,
-            'feeds'               => true,
-        );
+            'feeds'               => false,
+        ); 
         $args = array(
             'label'               => __( 'commercial_reps', 'commercial_reps' ),
             'description'         => __( 'A Commercial Sales Representative', 'commercial_reps' ),
             'labels'              => $labels,
-            'supports'            => false,
+            'supports'            => array( 'title' ),
             'hierarchical'        => false,
+            'taxonomies'          => array( 'commercial_verticals', 'commercial_territories' ),
             'register_meta_box_cb'=> array( 'commercial_reps', 'register_meta_boxes' ),
             'public'              => true,
             'show_ui'             => true,
@@ -140,11 +141,12 @@ class commercial_reps {
             'can_export'          => true,
             'has_archive'         => true,
             'exclude_from_search' => true,
-            'publicly_queryable'  => false,
+            'publicly_queryable'  => true,
             'rewrite'             => $rewrite,
             'capability_type'     => 'post',
         );
         register_post_type( 'commercial_reps', $args );
+        flush_rewrite_rules();
     }
 
     public static function register_commercial_verticals() {
@@ -179,10 +181,49 @@ class commercial_reps {
 
     }
 
+    function register_commercial_territories() {
+
+        $labels = array(
+            'name'                       => _x( 'Territories', 'Taxonomy General Name', 'commercial_reps' ),
+            'singular_name'              => _x( 'Territory', 'Taxonomy Singular Name', 'commercial_reps' ),
+            'menu_name'                  => __( 'Territories', 'commercial_reps' ),
+            'all_items'                  => __( 'All Territories', 'commercial_reps' ),
+            'parent_item'                => __( 'Parent Territory', 'commercial_reps' ),
+            'parent_item_colon'          => __( 'Parent Territory:', 'commercial_reps' ),
+            'new_item_name'              => __( 'New Territory', 'commercial_reps' ),
+            'add_new_item'               => __( 'Add New Territory', 'commercial_reps' ),
+            'edit_item'                  => __( 'Edit Territory', 'commercial_reps' ),
+            'update_item'                => __( 'Update Territory', 'commercial_reps' ),
+            'separate_items_with_commas' => __( 'Separate territories with commas', 'commercial_reps' ),
+            'search_items'               => __( 'Search Territory', 'commercial_reps' ),
+            'add_or_remove_items'        => __( 'Add or remove territories', 'commercial_reps' ),
+            'choose_from_most_used'      => __( 'Choose from the most used territories', 'commercial_reps' ),
+            'not_found'                  => __( 'Not Found', 'commercial_reps' ),
+        );
+        $rewrite = array(
+            'slug'                       => 'territories',
+            'with_front'                 => true,
+            'hierarchical'               => true,
+        ); 
+        $args = array(
+            'labels'                     => $labels,
+            'hierarchical'               => true,
+            'public'                     => true,
+            'show_ui'                    => true,
+            'show_admin_column'          => true,
+            'show_in_nav_menus'          => true,
+            'show_tagcloud'              => true,
+            'rewrite'                    => $rewrite,
+        );
+        register_taxonomy( 'commercial_territories', array( 'commercial_reps' ), $args );
+
+    } 
+
 
 }
 
 // Hook into the 'init' action
-add_action( 'init', array('commercial_reps', 'register_commercial_reps') );
+add_action( 'init', array('commercial_reps', 'register_commercial_territories') );
 add_action( 'init', array('commercial_reps', 'register_commercial_verticals') );
+add_action( 'init', array('commercial_reps', 'register_commercial_reps') );
 
