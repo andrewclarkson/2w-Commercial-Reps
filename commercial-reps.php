@@ -13,12 +13,64 @@ Version: 0.1
 Author URI: andrew.clarkson.mn
  */
 
+$states = array (
+    "Alabama",
+    "Alaska",
+    "Arizona",
+    "Arkansas",
+    "California",
+    "Colorado",
+    "Connecticut",
+    "Delaware",
+    "Florida",
+    "Georgia",
+    "Hawaii",
+    "Idaho",
+    "Illinois",
+    "Indiana",
+    "Iowa",
+    "Kansas",
+    "Kentucky",
+    "Louisiana",
+    "Maine",
+    "Maryland",
+    "Massachusetts",
+    "Michigan",
+    "Minnesota",
+    "Mississippi",
+    "Missouri",
+    "Montana",
+    "Nebraska",
+    "Nevada",
+    "New Hampshire",
+    "New Jersey",
+    "New Mexico",
+    "New York",
+    "North Carolina",
+    "North Dakota",
+    "Ohio",
+    "Oklahoma",
+    "Oregon",
+    "Pennsylvania",
+    "Rhode Island",
+    "South Carolina",
+    "South Dakota",
+    "Tennessee",
+    "Texas",
+    "Utah",
+    "Vermont",
+    "Virginia",
+    "Washington",
+    "West Virginia",
+    "Wisconsin",
+    "Wyoming",
+);
 
 class commercial_reps {
 
     public static function display_info_meta_box($post) {
         $custom = get_post_custom($post->ID);
-        $photo = $customer['representative-photo'][0];
+        $photo = $custom['representative-photo'][0];
         ?>
         <table class="form-table">
             <tbody>
@@ -44,11 +96,30 @@ class commercial_reps {
                 <tr>
                     <td>Name:</td>
                     <td>
-                        <label class="screen-reader-text" for="representative-phone">Name</label>
-                        <input type="text" name="representative-phone" aria-required="true" size="30" value="<?php echo $custom['representative-name'][0] ?>"/>
+                        <label class="screen-reader-text" for="representative-name">Name</label>
+                        <input type="text" name="representative-name" aria-required="true" size="30" value="<?php echo $custom['representative-name'][0] ?>"/>
                     </td>
                     <td>
                         <p class="howto">The representative's full name (first and last).</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>States:</td>
+                    <td>
+                        <label class="screen-reader-text" for="representative-states[]">States</label>
+                        <select name="representative-states[]" size="5" multiple="multiple" tabindex="1">
+                            <?php
+                            global $states;
+                            $selected = unserialize($custom['representative-states'][0]);
+                            foreach($states as $state) {
+                                $active = in_array($state, $selected)? ' selected' : ''; 
+                                echo '<option' . $active . '>' . $state . '</option>';
+                            }
+                            ?>
+                        </select>
+                    </td>
+                    <td>
+                        <p class="howto">Select multiple using control-click</p>
                     </td>
                 </tr>
                 <tr>
@@ -59,6 +130,16 @@ class commercial_reps {
                     </td>
                     <td>
                         <p class="howto">The representative's phone number.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Description:</td>
+                    <td>
+                        <label class="screen-reader-text" for="representative-description">Description</label>
+                        <textarea type="text" name="representative-description" size="30"><?php echo $custom['representative-description'][0] ?></textarea>
+                    </td>
+                    <td>
+                        <p class="howto">The representative's territories and verticals</p>
                     </td>
                 </tr>
                 <tr>
@@ -214,14 +295,40 @@ class commercial_reps {
         return $columns;
     }
 
+    public static function save_data($post_id) {
+        // verify if this is an auto save routine. 
+        // If it is our form has not been submitted, so we dont want to do anything
+        if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) 
+            return;
+
+        // verify this came from the our screen and with proper authorization,
+        // because save_post can be triggered at other times
+        if ( !wp_verify_nonce( $_POST['_wpnonce'] ) )
+            return;
+
+        if ( isset($_POST['representative-name']) ) {
+            update_post_meta($post_id, 'representative-name', $_POST['representative-name']);
+        }
+        
+        if ( isset($_POST['representative-phone']) ) {
+            update_post_meta($post_id, 'representative-phone', $_POST['representative-phone']);
+        }
+        
+        if ( isset($_POST['representative-states']) ) {
+            update_post_meta($post_id, 'representative-states', $_POST['representative-states']);
+        }
+
+    }
+
 }
 
 // Hook into the 'init' action
 add_action( 'init', array('commercial_reps', 'register_commercial_verticals') );
 add_action( 'init', array('commercial_reps', 'register_commercial_reps') );
 
-add_filter( 'manage_commercial_reps_posts_columns', array( 'commercial_reps', 'manage_columns' ) );
+add_action( 'save_post_commercial_reps', array( 'commercial_reps', 'save_data' ) ); 
 
+add_filter( 'manage_commercial_reps_posts_columns', array( 'commercial_reps', 'manage_columns' ) );
 
 // Add a shortcode for displaying the map
 add_shortcode( 'commercial_map', array( 'commercial_reps', 'display_map' ) );
