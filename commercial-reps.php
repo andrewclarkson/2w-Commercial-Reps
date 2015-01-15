@@ -42,6 +42,16 @@ class commercial_reps {
                     </td>
                 </tr>
                 <tr>
+                    <td>Name:</td>
+                    <td>
+                        <label class="screen-reader-text" for="representative-phone">Name</label>
+                        <input type="text" name="representative-phone" aria-required="true" size="30" value="<?php echo $custom['representative-name'][0] ?>"/>
+                    </td>
+                    <td>
+                        <p class="howto">The representative's full name (first and last).</p>
+                    </td>
+                </tr>
+                <tr>
                     <td>Phone Number:</td>
                     <td>
                         <label class="screen-reader-text" for="representative-phone">Phone Number</label>
