@@ -71,23 +71,17 @@ class commercial_reps {
     public static function display_info_meta_box($post) {
         $custom = get_post_custom($post->ID);
         $photo = $custom['representative-photo'][0];
+        wp_nonce_field( basename( __FILE__ ), 'representative-nonce' ); 
         ?>
-        <table class="form-table">
+        <table id="representative" class="form-table">
             <tbody>
                 <tr>
                     <td>
-                        <img src="<?php echo $photo ? $photo : 'http://1.gravatar.com/avatar/ad516503a11cd5ca435acc9bb6523536?s=128' ?>">
+                        <img id="representative-thumbnail" height="100" width="100" src="<?php echo $photo ? $photo : 'http://1.gravatar.com/avatar/ad516503a11cd5ca435acc9bb6523536?s=128' ?>">
                     </td>
                     <td>
-                        <input type="hidden" name="representative-photo" aria-required="true" size="30" value="<?php echo $custom['representative-photo'][0] ?>"/>
-                        <?php if ($photo) { ?>
-                            <p>
-                                <a href="<?php echo $photo ?>"><?php echo substr($photo, 0, 32); ?>...</a>
-                            </p>
-                        <?php } else { ?>
-                            <p>None</p>
-                        <?php } ?>
-                        <a class="button" id="upload-representative-photo" href="http://localhost/wordpress/wp-admin/media-upload.php?post_id=1&amp;type=image&amp;TB_iframe=1&amp;width=717&amp;height=575">Set Image</a>
+                        <input type="hidden" id="representative-photo" name="representative-photo" aria-required="true" size="30" value="<?php echo $custom['representative-photo'][0] ?>"/>
+                        <a class="button" id="upload-representative-photo" href="http://localhost/wordpress/wp-admin/media-upload.php?post_id=1&type=image">Set Image</a>
                     </td>
                     <td>
                         <p class="howto"></p>
@@ -151,9 +145,7 @@ class commercial_reps {
                     <td>
                         <p class="howto">Each representative should have a Formstack form with a unique url.</p>
                     </td>
-                </tr>
-                               
- 
+                </tr> 
             </tbody>
         </table>
         <?php
@@ -270,29 +262,54 @@ class commercial_reps {
             $query['tax_query'] = array(
                 array(
                     'taxonomy'  => 'commercial_verticals',
-                    'name'     => 'slug',
+                    'field'     => 'slug',
                     'terms'     => $attributes['verticals'],
                 ),
             );
         }
-        $query['tax_query'] = array(
-            array(
-                'taxonomy'  => 'commercial_verticals',
-                'field'     => 'slug',
-                'terms'     => 'multi-housing',
-            ),
-        );
 
         $posts = get_posts( $query );
 
-        foreach ( $posts as $post ) {
-            print_r( wp_get_post_terms( $post->ID, 'commercial_territories' ) );
+        if(count($posts) == 0) {
+            echo '<p>No Representatives Found</p>';
+        } 
+
+        $states = array();
+        foreach ($posts as $post) {
+            $custom = get_post_meta($post->ID);
+            $rep_states = unserialize($custom['representative-states'][0]);
+            if($rep_states) {
+                foreach ($rep_states as $state) {
+                    if(!isset($states[$state])) {
+                        $states[$state] = array();
+                    }
+                    array_push($states[$state], $custom);
+                }
+            }
         }
-    }
+
+        echo '<ul>';
+        ksort($states);
+        foreach ($states as $state => $representatives) {
+            echo '<li id="' . $state . '"><h2>' . $state . '</h2>';
+            echo '<ul>';
+            foreach ($representatives as $representative) {
+                $name = $representative['representative-name'][0];
+                $name = isset($name) && $name != '' ? $name : '(no name)';
+                echo '<li>' . $name . '</li>';
+            }
+            echo '</ul></li>';
+        }
+        echo '</ul>';
+   }
 
     public static function manage_columns( $columns ) {
         unset($columns['title']);
-        return $columns;
+        $new = array(
+            'representative-name' => __( 'Name', 'commercial_reps' ),
+            'representative-states' => __( 'States', 'commercial_reps' ),
+        );
+        return array_merge(array_slice($columns, 0, 1), $new, array_slice($columns, 1));
     }
 
     public static function save_data($post_id) {
@@ -301,15 +318,17 @@ class commercial_reps {
         if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) 
             return;
 
-        // verify this came from the our screen and with proper authorization,
-        // because save_post can be triggered at other times
-        if ( !wp_verify_nonce( $_POST['_wpnonce'] ) )
+        
+
+        if( !isset($_POST['representative-nonce']) || !wp_verify_nonce( $_POST['representative-nonce'], basename( __FILE__ ) )) {
             return;
+        }
+
 
         if ( isset($_POST['representative-name']) ) {
             update_post_meta($post_id, 'representative-name', $_POST['representative-name']);
         }
-        
+            
         if ( isset($_POST['representative-phone']) ) {
             update_post_meta($post_id, 'representative-phone', $_POST['representative-phone']);
         }
@@ -317,18 +336,55 @@ class commercial_reps {
         if ( isset($_POST['representative-states']) ) {
             update_post_meta($post_id, 'representative-states', $_POST['representative-states']);
         }
+        
+        if ( isset($_POST['representative-photo']) ) {
+            update_post_meta($post_id, 'representative-photo', $_POST['representative-photo']);
+        }
 
     }
 
-}
+    public static function custom_columns($column) {
+        $custom = get_post_custom();
+        switch($column) {
+            case 'representative-name':
+                $text = isset( $custom['representative-name'] ) && $custom['representative-name'][0] != '' ? $custom['representative-name'][0] : '(no name)';
+                
+                edit_post_link( $text );
+                    
+                break;
+            case 'representative-states':
+                if ( isset($custom['representative-states'][0]) ) {
+                    $states = unserialize($custom['representative-states'][0]);
+                    echo '<ul>';
+                    foreach ( $states as $state ) {
+                        echo '<li>' . $state . '</li>';
+                    }
+                    echo '</ul>';
+                } else {
+                    echo '&mdash;';
+                }
+                break;
+        }
+    }
 
+    public static function enqueue_scripts($hook) {
+        wp_enqueue_media();
+        wp_enqueue_script('commercial_reps', plugin_dir_url( __FILE__ ) . 'commercial-reps.js');
+    }
+
+}
 // Hook into the 'init' action
 add_action( 'init', array('commercial_reps', 'register_commercial_verticals') );
 add_action( 'init', array('commercial_reps', 'register_commercial_reps') );
 
 add_action( 'save_post_commercial_reps', array( 'commercial_reps', 'save_data' ) ); 
 
+add_action( 'manage_commercial_reps_posts_custom_column', array( 'commercial_reps', 'custom_columns') );
+
+add_action( 'admin_enqueue_scripts', array( 'commercial_reps', 'enqueue_scripts') );
+
 add_filter( 'manage_commercial_reps_posts_columns', array( 'commercial_reps', 'manage_columns' ) );
+
 
 // Add a shortcode for displaying the map
 add_shortcode( 'commercial_map', array( 'commercial_reps', 'display_map' ) );
