@@ -367,7 +367,7 @@ class commercial_reps {
         }
     }
 
-    public static function enqueue_scripts($hook) {
+    public static function enqueue_admin_scripts($hook) {
         wp_enqueue_media();
         wp_enqueue_script('commercial_reps', plugin_dir_url( __FILE__ ) . 'commercial-reps.js');
     }
@@ -381,7 +381,7 @@ add_action( 'save_post_commercial_reps', array( 'commercial_reps', 'save_data' )
 
 add_action( 'manage_commercial_reps_posts_custom_column', array( 'commercial_reps', 'custom_columns') );
 
-add_action( 'admin_enqueue_scripts', array( 'commercial_reps', 'enqueue_scripts') );
+add_action( 'admin_enqueue_scripts', array( 'commercial_reps', 'enqueue_admin_scripts') );
 
 add_filter( 'manage_commercial_reps_posts_columns', array( 'commercial_reps', 'manage_columns' ) );
 
