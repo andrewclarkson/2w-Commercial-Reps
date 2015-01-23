@@ -254,6 +254,12 @@ class commercial_reps {
     }
 
     public static function display_map( $atts ) {
+
+        wp_enqueue_style('leaflet_styles', 'http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css');
+        wp_enqueue_script('leaflet_map', 'http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js', array(), false, true);
+        wp_enqueue_script('commercial_map', plugin_dir_url( __FILE__ ) . 'commercial-map.js', array('leaflet_map'), false, true);
+        
+
         $defaults = array( 'verticals' => 'all' );
         $attributes = shortcode_atts($defaults, $atts);
         $query = array( 'post_type' => 'commercial_reps' );
@@ -272,6 +278,7 @@ class commercial_reps {
 
         if(count($posts) == 0) {
             echo '<p>No Representatives Found</p>';
+            return;
         } 
 
         $states = array();
@@ -288,6 +295,11 @@ class commercial_reps {
             }
         }
 
+?>
+        <div id="commercial-representatives">
+        <div id="commercial-representatives-map"></div>
+        <?php
+
         echo '<ul>';
         ksort($states);
         foreach ($states as $state => $representatives) {
@@ -301,6 +313,10 @@ class commercial_reps {
             echo '</ul></li>';
         }
         echo '</ul>';
+
+        ?>
+        </div>
+        <?php
    }
 
     public static function manage_columns( $columns ) {
