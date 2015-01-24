@@ -1,13 +1,47 @@
-#commercial-representatives-map {
-    height: 360px;
+#commercial-reps {
+    width: 720px;
+
 }
 
-#commercial-representatives > ul > li.active {
+#commercial-representatives-map {
+    width: 400px;
+    height: 360px;
+    float: left;
+}
+
+.commercial-states > li.active {
     display: block;
 }
 
-#commercial-representatives > ul > li {
+.commercial-states > li {
     display: none;
+    width: 300px;
+    margin-left: 20px;
+    float: right;
 }
 
+.commercial-states > li h2 {
+    margin: 0;
+    height: 40px; 
+}
 
+.commercial-representatives {
+    height: 320px;
+    overflow-y: scroll;
+    margin: 0;
+}
+
+.commercial-representatives li {
+    display: inline-block;
+    margin-bottom: 20px;
+}
+
+.commercial-representatives li img {
+    margin-right: 10px;
+    float: left;
+}
+
+.commercial-representatives li h3 {
+    display: inline;
+    margin: 0;
+}

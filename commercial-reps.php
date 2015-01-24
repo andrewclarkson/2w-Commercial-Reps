@@ -70,7 +70,7 @@ class commercial_reps {
 
     public static function display_info_meta_box($post) {
         $custom = get_post_custom($post->ID);
-        $photo = isset($custom['representative-photo']) ? $custom['representative-photo'][0] : '';
+        $photo = isset($custom['representative-photo']) ? wp_get_attachment_image_src($custom['representative-photo'][0], array(128, 128))[0] : '';
         $name = isset($custom['representative-name']) ? $custom['representative-name'][0] : '';
         $phone = isset($custom['representative-phone']) ? $custom['representative-phone'][0] : '';
         $description = isset($custom['representative-description']) ? $custom['representative-description'][0] : '';
@@ -305,19 +305,32 @@ class commercial_reps {
         }
 
 ?>
-        <div id="commercial-representatives">
+        <div id="commercial-reps">
         <div id="commercial-representatives-map" data-states="<?php echo plugin_dir_url( __FILE__ ) . 'states.json' ?>"></div>
         <?php
 
-        echo '<ul>';
+        echo '<ul class="commercial-states">';
         ksort($states);
         foreach ($states as $state => $representatives) {
             echo '<li id="' . $state . '"><h2>' . $state . '</h2>';
-            echo '<ul>';
+            echo '<ul class="commercial-representatives">';
             foreach ($representatives as $representative) {
-                $name = $representative['representative-name'][0];
-                $name = isset($name) && $name != '' ? $name : '(no name)';
-                echo '<li>' . $name . '</li>';
+                echo '<li>';
+                $name = isset($representative['representative-name']) ? $representative['representative-name'][0] : '';
+                $phone = isset($representative['representative-phone']) ? $representative['representative-phone'][0] : '';
+                $description = isset($representative['representative-description']) ? $representative['representative-description'] : '';
+                $photo = isset($representative['representative-photo']) ? $representative['representative-photo'][0] : ''; 
+                if($photo != '') {
+                    echo wp_get_attachment_image($photo, 'commercial_reps');
+                } else {
+                    ?>
+                    <img src="<?php echo plugin_dir_url( __FILE__ ) . 'default.jpg' ?>"> 
+                    <?php
+                }
+                echo '<h3 class="name">' . $name . '</h3>';
+                echo '<p class="phone">' . $phone . '</p>';
+                echo '<p class="description">' . $description . '</p>';
+                echo '</li>';
             }
             echo '</ul></li>';
         }
@@ -416,6 +429,7 @@ add_action( 'admin_enqueue_scripts', array( 'commercial_reps', 'enqueue_admin_sc
 
 add_filter( 'manage_commercial_reps_posts_columns', array( 'commercial_reps', 'manage_columns' ) );
 
+add_image_size( 'commercial_reps', 67, 83, true);
 
 // Add a shortcode for displaying the map
 add_shortcode( 'commercial_map', array( 'commercial_reps', 'display_map' ) );

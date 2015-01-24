@@ -1,5 +1,5 @@
 jQuery(document).ready(function($) {
-    var map = L.map('commercial-representatives-map').setView([37.8, -96], 4);
+    var map = L.map('commercial-representatives-map').setView([40, -95], 4);
     
     var tiles = L.tileLayer('http://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={access_token}', {
         id: 'mapbox.light',
