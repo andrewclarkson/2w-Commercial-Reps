@@ -256,6 +256,7 @@ class commercial_reps {
     public static function display_map( $atts ) {
 
         wp_enqueue_style('leaflet_styles', 'http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css');
+        wp_enqueue_style('commercial_map', plugin_dir_url( __FILE__ ) . 'commercial-map.css');
         wp_enqueue_script('leaflet_map', 'http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js', array(), false, true);
         wp_enqueue_script('commercial_map', plugin_dir_url( __FILE__ ) . 'commercial-map.js', array('leaflet_map'), false, true);
         
