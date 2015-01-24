@@ -11,6 +11,36 @@ jQuery(document).ready(function($) {
     
     tiles.addTo(map);
 
-    
-
+    var active = null;
+    var url = $("#commercial-representatives-map").data('states');
+    $.ajax({
+        url: url,
+        mimeType: 'application/json',
+        dataType: 'json',
+        success: function(data) {
+            L.geoJson(data, {
+                onEachFeature: function(feature, layer) {
+                    layer.on({
+                        click: function(event) {
+                            var state = document.getElementById(feature.properties.name);
+                            console.log(state);
+                            if(active && active != feature.properties.name) {
+                                var old = document.getElementById(active);
+                                $(old).removeClass('active');
+                            }
+                            
+                            if(!state) {
+                                $('#none').addClass('active');
+                                active = 'none';
+                                return;
+                            } else {
+                                active = feature.properties.name;
+                                $(state).addClass('active');
+                            }
+                        }
+                    });
+                }
+            }).addTo(map);
+        }
+    });    
 });

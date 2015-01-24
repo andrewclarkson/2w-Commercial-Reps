@@ -321,6 +321,12 @@ class commercial_reps {
             }
             echo '</ul></li>';
         }
+       
+        ?>
+            <li id="none">
+                <p>There are no representatives</p>
+            </li>
+        <?php
         echo '</ul>';
 
         ?>

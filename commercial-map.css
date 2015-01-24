@@ -1,3 +1,13 @@
 #commercial-representatives-map {
     height: 360px;
 }
+
+#commercial-representatives > ul > li.active {
+    display: block;
+}
+
+#commercial-representatives > ul > li {
+    display: none;
+}
+
+
