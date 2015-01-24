@@ -70,17 +70,21 @@ class commercial_reps {
 
     public static function display_info_meta_box($post) {
         $custom = get_post_custom($post->ID);
-        $photo = $custom['representative-photo'][0];
+        $photo = isset($custom['representative-photo']) ? $custom['representative-photo'][0] : '';
+        $name = isset($custom['representative-name']) ? $custom['representative-name'][0] : '';
+        $phone = isset($custom['representative-phone']) ? $custom['representative-phone'][0] : '';
+        $description = isset($custom['representative-description']) ? $custom['representative-description'][0] : '';
+        $form = isset($custom['representative-form']) ? $custom['representative-form'][0] : ''; 
         wp_nonce_field( basename( __FILE__ ), 'representative-nonce' ); 
         ?>
         <table id="representative" class="form-table">
             <tbody>
                 <tr>
                     <td>
-                        <img id="representative-thumbnail" height="100" width="100" src="<?php echo $photo ? $photo : 'http://1.gravatar.com/avatar/ad516503a11cd5ca435acc9bb6523536?s=128' ?>">
+                        <img id="representative-thumbnail" height="100" width="100" src="<?php echo $photo != '' ? $photo : 'http://1.gravatar.com/avatar/ad516503a11cd5ca435acc9bb6523536?s=128' ?>">
                     </td>
                     <td>
-                        <input type="hidden" id="representative-photo" name="representative-photo" aria-required="true" size="30" value="<?php echo $custom['representative-photo'][0] ?>"/>
+                        <input type="hidden" id="representative-photo" name="representative-photo" aria-required="true" size="30" value="<?php echo $photo ? $photo : '' ?>"/>
                         <a class="button" id="upload-representative-photo" href="http://localhost/wordpress/wp-admin/media-upload.php?post_id=1&type=image">Set Image</a>
                     </td>
                     <td>
@@ -91,7 +95,7 @@ class commercial_reps {
                     <td>Name:</td>
                     <td>
                         <label class="screen-reader-text" for="representative-name">Name</label>
-                        <input type="text" name="representative-name" aria-required="true" size="30" value="<?php echo $custom['representative-name'][0] ?>"/>
+                        <input type="text" name="representative-name" aria-required="true" size="30" value="<?php echo $name ?>"/>
                     </td>
                     <td>
                         <p class="howto">The representative's full name (first and last).</p>
@@ -104,9 +108,13 @@ class commercial_reps {
                         <select name="representative-states[]" size="5" multiple="multiple" tabindex="1">
                             <?php
                             global $states;
-                            $selected = unserialize($custom['representative-states'][0]);
+                            $check = isset($custom['representative-states']);
+                            
+                            
+                            $selected = $check ? unserialize($custom['representative-states'][0]) : false;
                             foreach($states as $state) {
-                                $active = in_array($state, $selected)? ' selected' : ''; 
+                                
+                                $active = $check && in_array($state, $selected) ? ' selected' : ''; 
                                 echo '<option' . $active . '>' . $state . '</option>';
                             }
                             ?>
@@ -120,7 +128,7 @@ class commercial_reps {
                     <td>Phone Number:</td>
                     <td>
                         <label class="screen-reader-text" for="representative-phone">Phone Number</label>
-                        <input type="text" name="representative-phone" aria-required="true" size="30" value="<?php echo $custom['representative-phone'][0] ?>"/>
+                        <input type="text" name="representative-phone" aria-required="true" size="30" value="<?php echo $phone ?>"/>
                     </td>
                     <td>
                         <p class="howto">The representative's phone number.</p>
@@ -130,7 +138,7 @@ class commercial_reps {
                     <td>Description:</td>
                     <td>
                         <label class="screen-reader-text" for="representative-description">Description</label>
-                        <textarea type="text" name="representative-description" size="30"><?php echo $custom['representative-description'][0] ?></textarea>
+                        <textarea type="text" name="representative-description" size="30"><?php echo $description ?></textarea>
                     </td>
                     <td>
                         <p class="howto">The representative's territories and verticals</p>
@@ -140,7 +148,7 @@ class commercial_reps {
                     <td>Formstack Url:</td>
                     <td>
                         <label class="screen-reader-text" for="representative-form">Formstack Form Url</label>
-                        <input class="code" type="text" name="representative-form" aria-required="true" size="30" value="<?php echo $custom['representative-form'][0] ?>"/>
+                        <input class="code" type="text" name="representative-form" aria-required="true" size="30" value="<?php echo $form ?>"/>
                     </td>
                     <td>
                         <p class="howto">Each representative should have a Formstack form with a unique url.</p>
@@ -298,7 +306,7 @@ class commercial_reps {
 
 ?>
         <div id="commercial-representatives">
-        <div id="commercial-representatives-map"></div>
+        <div id="commercial-representatives-map" data-states="<?php echo plugin_dir_url( __FILE__ ) . 'states.json' ?>"></div>
         <?php
 
         echo '<ul>';
